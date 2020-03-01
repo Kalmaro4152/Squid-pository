@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using FinchAPI;
+using System.Linq;
 
 namespace Project_FinchControl
 {
@@ -26,7 +27,6 @@ namespace Project_FinchControl
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            SetTheme();
 
             DisplayWelcomeScreen();
             DisplayMenuScreen();
@@ -49,6 +49,7 @@ namespace Project_FinchControl
         /// </summary>
         static void DisplayMenuScreen()
         {
+            
             Console.CursorVisible = true;
 
             bool quitApplication = false;
@@ -58,8 +59,10 @@ namespace Project_FinchControl
 
             do
             {
-                DisplayScreenHeader("Main Menu");
-
+                Console.ForegroundColor = ConsoleColor.DarkBlue;
+                Console.BackgroundColor = ConsoleColor.White;
+                Console.Clear();
+                DisplayScreenHeader("Main Menu");               
                 //
                 // get user menu choice
                 //
@@ -87,7 +90,7 @@ namespace Project_FinchControl
                         break;
 
                     case "c":
-
+                        DataRecorderDisplayMenuScreen(finchRobot);
                         break;
 
                     case "d":
@@ -126,6 +129,9 @@ namespace Project_FinchControl
         /// </summary>
         static void DisplayTalentShowMenuScreen(Finch myFinch)
         {
+            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.DarkMagenta;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.CursorVisible = true;
 
             bool quitTalentShowMenu = false;
@@ -209,11 +215,11 @@ namespace Project_FinchControl
         // * Talent Show > Play a Concert
         // * Plays the first few measures of "Bloom Nobly, Ink Black Cherry Blossom ~ Border of Life" by ZUN
         // *************************************************************************************************
-        
+
         static void PlayBorderofLife(Finch finchRobot)
         {
             DisplayScreenHeader("Play Border of Life");
-            
+
             Console.WriteLine("\tThe Finch will now play Bloom Nobly, Ink Black Cherry Blossom ~ Border of Life by ZUN");
             DisplayContinuePrompt();
 
@@ -271,12 +277,12 @@ namespace Project_FinchControl
             finchRobot.wait(1600);
             finchRobot.noteOff();
         }
-        
+
         //**************************
         // Talent Show > Bust a Move
         // Finch will now dance
         //**************************
-        
+
         static void DisplayDanceMoves(Finch finchRobot)
         {
             DisplayScreenHeader("Crap Dancing");
@@ -299,19 +305,19 @@ namespace Project_FinchControl
             }
             DisplayMenuPrompt("Talent Show");
         }
-        
+
         //*************************
         //Talent Show > Zoom!
         // ZOOM BY TIM ALLEN!
         //*************************
-        
+
         static void ZoomByTimAllen(Finch finchRobot)
         {
             DisplayScreenHeader("Zoom!");
 
             Console.WriteLine("\t The Finch will now zoom as fast as it can, watch out!");
             DisplayContinuePrompt();
-            
+
             finchRobot.setMotors(255, 255);
             finchRobot.wait(2000);
             finchRobot.setMotors(255, 50);
@@ -325,6 +331,175 @@ namespace Project_FinchControl
         #endregion
 
         #region DATA RECORDER
+        //*********************
+        // Data Recorder Menu
+        //*********************
+
+        static void DataRecorderDisplayMenuScreen(Finch finchRobot)
+        {
+            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.DarkYellow;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.CursorVisible = true;
+
+            double dataPointFrequency = 0;
+            double[] tempuratures = null;
+
+            int numberOfPoints = 0;
+
+            bool quitMenu = false;
+            string menuChoice;
+
+            do
+            {
+                DisplayScreenHeader("Data Recorder");
+
+                //
+                // get user menu choice
+                //
+                Console.WriteLine("\ta) Number of Data Points");
+                Console.WriteLine("\tb) Frequency of Data Points");
+                Console.WriteLine("\tc) Get Data");
+                Console.WriteLine("\td) Show Data");
+                Console.WriteLine("\tq) Return to Main Menu");
+                Console.Write("\t\tEnter Choice:");
+                menuChoice = Console.ReadLine().ToLower();
+
+                //
+                // process user menu choice
+                //
+                switch (menuChoice)
+                {
+                    case "a":
+                        numberOfPoints = DataRecorderDisplayGetNumberOfDataPoints(finchRobot);
+                        break;
+
+                    case "b":
+                        dataPointFrequency = DataRecorderDisplayGetDataPointFrequency(finchRobot);
+                        break;
+
+                    case "c":
+                        tempuratures = DataRecorderDisplayGetData(numberOfPoints, dataPointFrequency, finchRobot);
+                        break;
+
+                    case "d":
+                        DataRecorderDisplayData(tempuratures, finchRobot);
+                        break;
+
+                    case "q":
+                        quitMenu = true;
+                        break;
+
+                    default:
+                        Console.WriteLine();
+                        Console.WriteLine("\tPlease enter a letter for the menu choice.");
+                        DisplayContinuePrompt();
+                        break;
+                }
+
+            } while (!quitMenu);
+        }
+
+        static void DataRecorderDisplayData(double[] tempuratures, Finch finchRobot)
+        {
+            DisplayScreenHeader("Show Data");
+
+            DataRecorderDisplayTable(tempuratures);
+
+            Console.WriteLine();
+            Console.WriteLine($"Average Tempurature: {tempuratures.Average()}");
+            
+            DisplayMenuPrompt("Data Recorder");
+        }
+
+        static void DataRecorderDisplayTable(double[] tempuratures)
+        {
+            Console.WriteLine("Data Point".PadLeft(12) + "Tempuratures".PadLeft(14));
+            Console.WriteLine("----------".PadLeft(12) + "------------".PadLeft(14));
+            for (int index = 0; index < tempuratures.Length; index++)
+            {
+                Console.WriteLine($"{index + 1}".PadLeft(12) + tempuratures[index].ToString("n2").PadLeft(14));
+            }
+        }
+
+        static double[] DataRecorderDisplayGetData(int numberOfPoints, double dataPointFrequency, Finch finchRobot)
+        {
+            double[] tempuratures = new double[numberOfPoints];
+            int frequencyInSeconds; 
+
+            DisplayScreenHeader("Get Data");
+
+            //echo Information
+            Console.WriteLine("The Finch Robot is now ready to record Tempuratures.");
+            DisplayContinuePrompt();
+
+            for (int index = 0; index < numberOfPoints; index++)
+            {
+                tempuratures[index] = finchRobot.getTemperature();
+                Console.WriteLine($"Data #{index + 1}: {tempuratures[index]}c");
+                frequencyInSeconds = (int)(dataPointFrequency * 1000);
+                finchRobot.wait(frequencyInSeconds);
+            }
+
+            DisplayMenuPrompt("Data Recorder");
+            return tempuratures;            
+        }
+
+        static double DataRecorderDisplayGetDataPointFrequency(Finch finchRobot)
+        {
+            double dataPointFrequncy;
+            bool validRes = false;
+            DisplayScreenHeader("Data Point Frequency");
+            
+            do
+            {
+                Console.Write("How Frequently to Take Readings (In Seconds) >> ");
+                validRes = double.TryParse(Console.ReadLine(), out dataPointFrequncy);
+                if (validRes == false)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Please input a valid, numeric value.");
+                }
+                else
+                {
+                    DisplayMenuPrompt("Data Recorder");
+                    return dataPointFrequncy;
+                }
+            } while (!validRes);
+            
+            Console.WriteLine("Ya Broke It");
+            Console.ReadKey();
+            return dataPointFrequncy;
+        }
+
+        static int DataRecorderDisplayGetNumberOfDataPoints(Finch finchRobot)
+        {
+            int numberOfDataPoints;
+            bool validRes = false;
+
+            DisplayScreenHeader("Number of Data Points");
+            
+            do
+            {
+                Console.Write("Number of Data Points to Record >> ");
+                validRes = int.TryParse(Console.ReadLine(), out numberOfDataPoints);
+                if (validRes == false)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Please input a valid, numeric value.");
+                    
+                }
+                else
+                {
+                    DisplayMenuPrompt("Data Recorder");
+                    return numberOfDataPoints;
+                }
+            } while (!validRes);
+
+            Console.WriteLine("Ya Broke It");
+            Console.ReadKey();
+            return numberOfDataPoints;
+        }
 
         #endregion
 
@@ -439,7 +614,7 @@ namespace Project_FinchControl
         static void DisplayMenuPrompt(string menuName)
         {
             Console.WriteLine();
-            Console.WriteLine($"\tPress any key to return to the {menuName} Menu.");
+            Console.WriteLine($"\tPress any key to return to the {menuName}.");
             Console.ReadKey();
         }
 
