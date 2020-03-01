@@ -354,9 +354,9 @@ namespace Project_FinchControl
             {
                 DisplayScreenHeader("Data Recorder");
 
-                //
+                //**********************
                 // get user menu choice
-                //
+                //**********************
                 Console.WriteLine("\ta) Number of Data Points");
                 Console.WriteLine("\tb) Frequency of Data Points");
                 Console.WriteLine("\tc) Get Data");
@@ -365,9 +365,9 @@ namespace Project_FinchControl
                 Console.Write("\t\tEnter Choice:");
                 menuChoice = Console.ReadLine().ToLower();
 
-                //
+                //**************************
                 // process user menu choice
-                //
+                //**************************
                 switch (menuChoice)
                 {
                     case "a":
@@ -400,6 +400,9 @@ namespace Project_FinchControl
             } while (!quitMenu);
         }
 
+        //***********************8
+        // Display Recorded Data
+        //***********************8
         static void DataRecorderDisplayData(double[] tempuratures, Finch finchRobot)
         {
             DisplayScreenHeader("Show Data");
@@ -412,6 +415,9 @@ namespace Project_FinchControl
             DisplayMenuPrompt("Data Recorder");
         }
 
+        //**************************
+        // Display a Table
+        //**********************
         static void DataRecorderDisplayTable(double[] tempuratures)
         {
             Console.WriteLine("Data Point".PadLeft(12) + "Tempuratures".PadLeft(14));
@@ -422,6 +428,9 @@ namespace Project_FinchControl
             }
         }
 
+        //****************88888
+        // Retrieve Data
+        //***********************
         static double[] DataRecorderDisplayGetData(int numberOfPoints, double dataPointFrequency, Finch finchRobot)
         {
             double[] tempuratures = new double[numberOfPoints];
@@ -445,6 +454,9 @@ namespace Project_FinchControl
             return tempuratures;            
         }
 
+        //*********************8
+        //Freqeuncy of Data Points
+        //***********************
         static double DataRecorderDisplayGetDataPointFrequency(Finch finchRobot)
         {
             double dataPointFrequncy;
@@ -472,6 +484,9 @@ namespace Project_FinchControl
             return dataPointFrequncy;
         }
 
+        //***********************
+        //Number of Data Points
+        //***********************8
         static int DataRecorderDisplayGetNumberOfDataPoints(Finch finchRobot)
         {
             int numberOfDataPoints;
