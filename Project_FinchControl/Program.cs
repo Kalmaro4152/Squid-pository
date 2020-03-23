@@ -886,7 +886,7 @@ namespace Project_FinchControl
             
             do
             {
-                Console.BackgroundColor = ConsoleColor.Green;
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Clear();
                 DisplayScreenHeader("User Programming");
@@ -946,10 +946,11 @@ namespace Project_FinchControl
             {
                 Console.Write("\tInput Motor Speed [1 - 255] >> ");
                 validRes = int.TryParse(Console.ReadLine(), out commandParameters.motorSpeed);
-                if (!validRes || commandParameters.motorSpeed > 255 || commandParameters.motorSpeed < 1)
+                if (!validRes | commandParameters.motorSpeed > 255 | commandParameters.motorSpeed < 1)
                 {
-                    Console.WriteLine();
                     Console.WriteLine("Please input a whole numerical value of 1 - 255");
+                    Console.WriteLine();
+                    validRes = false;
                 }
                 else Console.WriteLine();
             } while (!validRes);
@@ -958,10 +959,11 @@ namespace Project_FinchControl
             {
                 Console.Write("\tLED Brightness [1 - 255] >> ");
                 validRes = int.TryParse(Console.ReadLine(), out commandParameters.ledBrightness);
-                if (!validRes || commandParameters.motorSpeed > 255 || commandParameters.ledBrightness < 1)
+                if (!validRes | commandParameters.ledBrightness > 255 | commandParameters.ledBrightness < 1)
                 {
-                    Console.WriteLine();
                     Console.WriteLine("Please input a whole numerical value of 1 - 255");
+                    Console.WriteLine();
+                    validRes = false;
                 }
                 else Console.WriteLine();
             } while (!validRes);
@@ -972,8 +974,9 @@ namespace Project_FinchControl
                 validRes = double.TryParse(Console.ReadLine(), out commandParameters.waitSeconds);
                 if (!validRes)
                 {
-                    Console.WriteLine();
                     Console.WriteLine("Please input a numerical value.");
+                    Console.WriteLine();
+                    validRes = false;   
                 }
                 else Console.WriteLine();
             } while (!validRes);
@@ -1007,10 +1010,17 @@ namespace Project_FinchControl
             while (command != Commands.DONE)
             {
                 Console.Write("Please enter a command: ");
-                Console.WriteLine();
 
-                if (Enum.TryParse(Console.ReadLine().ToUpper(), out command)) commands.Add(command);
-                else Console.WriteLine("Please enter a command from the list above.");
+                if (Enum.TryParse(Console.ReadLine().ToUpper(), out command))
+                {
+                    commands.Add(command); 
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a command from the list above.");
+                    Console.WriteLine();
+                }
             }
 
             Console.WriteLine("Commands will be executed in the order dictated above.");
@@ -1081,7 +1091,7 @@ namespace Project_FinchControl
                         break;
                     
                     case Commands.LEDON:
-                        finchRobot.setLED(255, 255, 255;
+                        finchRobot.setLED(255, 255, 255);
                         commandFeedback = Commands.LEDON.ToString();
                         break;
                     
@@ -1107,12 +1117,11 @@ namespace Project_FinchControl
                     
                     case Commands.GETTEMPURATURE:
 
-                        commandFeedback = $"Current Tempurature: {finchRobot.getTemperature().ToString("n2")};";
+                        commandFeedback = $"Current Tempurature: {finchRobot.getTemperature().ToString("n2")}";
                         break;
                     
                     case Commands.DONE:
-                        finchRobot.setMotors(-motorSpeed, -motorSpeed);
-                        commandFeedback = Commands.MOVEBACKWARDS.ToString();
+                        commandFeedback = $"Finch is now finish executing given commands.";
                         break;
                 }
                 Console.WriteLine($"\t {commandFeedback}");
