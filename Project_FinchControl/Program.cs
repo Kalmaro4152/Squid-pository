@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FinchAPI;
 
@@ -15,7 +16,7 @@ namespace Project_FinchControl
     // Author: Velis, John
     // Modified by: Kyle Morrill
     // Dated Created: 1/22/2020
-    // Last Modified: 3/16/2020
+    // Last Modified: 3/25/2020
     //
     // **************************************************
 
@@ -89,7 +90,8 @@ namespace Project_FinchControl
                 Console.WriteLine("\tc) Data Recorder");
                 Console.WriteLine("\td) Alarm System");
                 Console.WriteLine("\te) User Programming");
-                Console.WriteLine("\tf) Disconnect Finch Robot");
+                Console.WriteLine("\tf) File Input/Output Test");
+                Console.WriteLine("\tg) Disconnect Finch Robot");
                 Console.WriteLine("\tq) Quit");
                 Console.Write("\t\tEnter Choice:");
                 menuChoice = Console.ReadLine().ToLower();
@@ -120,6 +122,10 @@ namespace Project_FinchControl
                         break;
 
                     case "f":
+                        DisplayGetInOut(finchRobot);
+                        break;
+
+                    case "g":
                         DisplayDisconnectFinchRobot(finchRobot);
                         break;
 
@@ -1127,6 +1133,174 @@ namespace Project_FinchControl
                 Console.WriteLine($"\t {commandFeedback}");
             }
             DisplayMenuPrompt("User Programming");
+        }
+
+        #endregion
+
+        #region File I/O
+
+        //************************************
+        //FILE INPUT OUTPUT MENU
+        //**********************************
+
+        
+        static void DisplayGetInOut(Finch finchRobot)
+        {
+            string menuChoice;
+
+            ConsoleColor foregroundColor;
+            ConsoleColor backgroundColor;
+            string dataPath = @"Data/Theme.txt";
+
+
+            bool quitMenu = false;
+
+
+            do
+            {
+                SetConsoleTheme(dataPath);
+                
+                DisplayScreenHeader("File Input/Output Test");
+                Console.WriteLine("\tExecutes a File I/O and displays the response.");
+
+                Console.WriteLine("\ta) Change this Menu's Color Pallet");
+                Console.WriteLine("\tb) Choose a File to read from");
+                Console.WriteLine("\tc) Display File Contents");
+                Console.Write("Selection >> ");
+                menuChoice = Console.ReadLine();
+
+                switch (menuChoice)
+                {
+                    case "a":
+                        (foregroundColor, backgroundColor) = GetMenuColors();
+                        break;
+
+                    case "b":
+                        GetFileToRead();
+                        break;
+
+                    case "q":
+                        quitMenu = true;
+                        break;
+
+                    default:
+                        Console.WriteLine();
+                        Console.WriteLine("Please Choose an option.");
+                        break;
+                } 
+            }while (!quitMenu) ;
+        }
+
+        static (ConsoleColor foregroundColor, ConsoleColor backgroundColor) ReadConsoleTheme(string dataPath)
+        {
+            ConsoleColor foregroundColor;
+            ConsoleColor backgroundColor;
+            
+            string[] themeColors = File.ReadAllLines(dataPath);
+            Enum.TryParse(themeColors[0], true, out foregroundColor);
+            Enum.TryParse(themeColors[1], true, out backgroundColor);
+            
+            
+
+            return (foregroundColor, backgroundColor) ;
+        }
+        
+        private static void SetConsoleTheme(string dataPath)
+        {
+            (ConsoleColor foregroundColor, ConsoleColor backgroundColor) themeColors;
+
+            themeColors = ReadConsoleTheme(dataPath);
+            Console.ForegroundColor = themeColors.foregroundColor;
+            Console.BackgroundColor = themeColors.backgroundColor;
+            Console.Clear();
+
+            Console.WriteLine($"\tCurrent foreground color: {Console.ForegroundColor}");
+            Console.WriteLine($"\tCurrent background color: {Console.BackgroundColor}");
+        }
+
+        static (ConsoleColor foregroundColor, ConsoleColor backgroundColor) GetMenuColors()
+        {
+            int colorCount = 1;
+            bool validConsoleColor = false;
+            ConsoleColor foregroundColor;
+            ConsoleColor backgroundColor;
+            
+            DisplayScreenHeader("Set Screen Colors");
+
+            Console.WriteLine("Set and Save the Colors for this Menu Set.");
+            Console.WriteLine("The Colors to Choose From:");
+            foreach (string consoleColors in Enum.GetNames(typeof(ConsoleColor)))
+            {
+                Console.Write($"-{consoleColors.ToLower()}\t");
+                if (colorCount % 5 == 0) Console.Write("\n");
+                colorCount++;
+            }
+            Console.WriteLine();
+
+            do
+            {
+                Console.Write("\tForeground Color: ");
+                validConsoleColor = Enum.TryParse<ConsoleColor>(Console.ReadLine(), true, out foregroundColor);
+                if (!validConsoleColor) Console.WriteLine("\tPlease choose a color from the list.");
+                else
+                {
+                    validConsoleColor = true;
+                    Console.WriteLine($"Foreground Color will be set to {foregroundColor}.");
+                    Console.WriteLine();
+                }
+            } while (!validConsoleColor);
+
+            do
+            {
+                Console.Write("\tBackground Color: ");
+                validConsoleColor = Enum.TryParse<ConsoleColor>(Console.ReadLine(), true, out backgroundColor);
+                if (!validConsoleColor) Console.WriteLine("\tPlease choose a color from the list.");
+                else
+                {
+                    validConsoleColor = true;
+                    Console.WriteLine($"Background Color will be set to {backgroundColor}.");
+                    Console.WriteLine();
+                }
+            } while (!validConsoleColor);
+
+            SaveUserConsoleColor(foregroundColor, backgroundColor);
+
+            DisplayMenuPrompt("File Input/Output Test");
+
+            return (foregroundColor, backgroundColor);
+        }
+
+        static void SaveUserConsoleColor(ConsoleColor foregroundColor, ConsoleColor backgroundColor)
+        {
+            string dataPath = @"Data/Theme.txt";
+
+            File.WriteAllText(dataPath, foregroundColor.ToString() + "\n");
+            File.AppendAllText(dataPath, backgroundColor.ToString());
+            Console.WriteLine("Information written to Theme.txt");
+        }
+
+        static void GetFileToRead()
+        {
+            string fileIOStat;
+            DisplayScreenHeader("Read a File");
+
+            Console.WriteLine("Choose a file and display it to the console.");
+            Console.WriteLine("Type a path to a file, or type [quit] to quit.");
+            Console.Write("Relative File Path starting at Debug/ >> ");
+            string filePath = Console.ReadLine();
+            Console.WriteLine();
+
+            try
+            {
+                Console.WriteLine(File.ReadAllText($@"{filePath}"));
+                fileIOStat = "Read Successful";
+            }
+            catch (DirectoryNotFoundException) { fileIOStat = "Directory not Found"; }
+            catch (FileNotFoundException) { fileIOStat = "File not Found"; }
+            catch (Exception) { fileIOStat = "Unable to Read File/Directory"; }
+            Console.WriteLine($"{fileIOStat}");
+
+            DisplayMenuPrompt("File Input/Output Test");
         }
 
         #endregion
