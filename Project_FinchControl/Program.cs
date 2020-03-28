@@ -1141,7 +1141,7 @@ namespace Project_FinchControl
 
         //************************************
         //FILE INPUT OUTPUT MENU
-        //**********************************
+        //************************************
 
         
         static void DisplayGetInOut(Finch finchRobot)
@@ -1165,7 +1165,7 @@ namespace Project_FinchControl
 
                 Console.WriteLine("\ta) Change this Menu's Color Pallet");
                 Console.WriteLine("\tb) Choose a File to read from");
-                Console.WriteLine("\tc) Display File Contents");
+                Console.WriteLine("\tq) Return to Main Menu");
                 Console.Write("Selection >> ");
                 menuChoice = Console.ReadLine();
 
@@ -1275,7 +1275,7 @@ namespace Project_FinchControl
             string dataPath = @"Data/Theme.txt";
 
             File.WriteAllText(dataPath, foregroundColor.ToString() + "\n");
-            File.AppendAllText(dataPath, backgroundColor.ToString());
+            File.AppendAllText(dataPath, backgroundColor.ToString() + "\n");
             Console.WriteLine("Information written to Theme.txt");
         }
 
@@ -1288,6 +1288,7 @@ namespace Project_FinchControl
             Console.WriteLine("Type a path to a file, or type [quit] to quit.");
             Console.Write("Relative File Path starting at Debug/ >> ");
             string filePath = Console.ReadLine();
+            if (filePath == "quit") return;
             Console.WriteLine();
 
             try
